@@ -1,0 +1,125 @@
+/* Design Tokens & Logical CSS Foundations
+ * Uses CSS Custom Properties so partner themes and Shadow DOM isolation work seamlessly.
+ * Uses CSS logical properties (margin-inline, padding-inline, inset-inline-start) for RTL readiness (Arabic 'ar' etc.).
+ */
+
+@font-face {
+  font-family: "GatewaySans";
+  src: local("Plus Jakarta Sans"), local("Segoe UI"), local("Roboto"), local("Helvetica Neue"), local("Arial");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GatewayEthiopic";
+  src: local("Noto Sans Ethiopic"), local("Abyssinica SIL"), local("Nyala"), local("Kefa"), local("Ebrima");
+  font-display: swap;
+  unicode-range: U+1200-137F, U+1380-139F, U+2D80-2DDF, U+AB00-AB2F;
+}
+
+:root,
+:host {
+  /* Typography */
+  --gw-font-sans: "GatewaySans", "GatewayEthiopic", "Noto Sans Ethiopic", "Abyssinica SIL", "Nyala", system-ui, -apple-system, sans-serif;
+  --gw-font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+
+  /* Neutral Canvas & Structural Surfaces (60-30-10) */
+  --gw-bg-canvas: #f8fafc;
+  --gw-bg-surface: #ffffff;
+  --gw-bg-subtle: #f1f5f9;
+  --gw-border: #cbd5e1;
+  --gw-border-strong: #94a3b8;
+
+  /* Text Tokens (WCAG AA/AAA verified on white & canvas) */
+  --gw-text-primary: #0f172a;
+  --gw-text-secondary: #334155;
+  --gw-text-muted: #475569;
+
+  /* Partner Brand Accent Tokens (Overridden dynamically by Theme Config + Contrast Guardrail) */
+  --gw-primary: #0a2540;
+  --gw-primary-text: #ffffff;
+  --gw-primary-hover: #13385e;
+  --gw-secondary: #0f766e;
+  --gw-secondary-text: #ffffff;
+  --gw-secondary-soft: #f0fdfa;
+
+  /* Semantic Status Tokens (Always paired with icon + text, never hue-only) */
+  --gw-error-bg: #fef2f2;
+  --gw-error-border: #b91c1c;
+  --gw-error-text: #991b1b;
+
+  --gw-success-bg: #f0fdf4;
+  --gw-success-border: #15803d;
+  --gw-success-text: #166534;
+
+  --gw-warn-bg: #fffbeb;
+  --gw-warn-border: #b45309;
+  --gw-warn-text: #92400e;
+
+  --gw-info-bg: #eff6ff;
+  --gw-info-border: #1d4ed8;
+  --gw-info-text: #1e40af;
+
+  /* Focus Indicator (>= 2px thick, >= 3:1 contrast) */
+  --gw-focus-ring: #1d4ed8;
+  --gw-focus-offset: 2px;
+
+  /* Radii & Spacing */
+  --gw-radius-sm: 6px;
+  --gw-radius-md: 10px;
+  --gw-radius-lg: 14px;
+  --gw-touch-min: 44px;
+  --gw-header-offset: 112px;
+}
+
+/* Ensure sticky headers never obscure focused elements (WCAG 2.2 2.4.11 Focus Not Obscured) */
+html {
+  scroll-padding-top: var(--gw-header-offset);
+}
+
+/* Strong, visible focus indicator across keyboard navigation */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--gw-focus-ring);
+  outline-offset: var(--gw-focus-offset);
+  border-radius: 4px;
+}
+
+/* Logical utility helpers for RTL & LTR extensibility */
+.gw-container {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.gw-prose-measure {
+  max-width: 68ch;
+}
+
+.gw-touch-target {
+  min-height: var(--gw-touch-min);
+  min-width: var(--gw-touch-min);
+}
+
+.gw-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

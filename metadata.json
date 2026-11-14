@@ -1,0 +1,6 @@
+{
+  "name": "Accessible Onboarding & Career Gateway",
+  "description": "Reusable, WCAG 2.2 AA compliant onboarding and career discovery plug-in with English/Amharic support, voice input, privacy-first drafts, and embeddable Web Component.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,329 @@
+openapi: 3.1.0
+info:
+  title: Accessible Onboarding & Career Gateway API (PROPOSED - backend to confirm)
+  version: 0.1.0-proposed
+  description: >
+    PROPOSED - backend to confirm.
+    Contract expected by the Accessible Onboarding & Career Gateway frontend REST adapter.
+    Do not assume these endpoints are live in Demo mode; the frontend switches cleanly
+    between MockAdapter and RestAdapter via VITE_API_BASE_URL.
+
+servers:
+  - url: https://api.example.org
+    description: Configured via VITE_API_BASE_URL
+
+paths:
+  /api/v1/capabilities:
+    get:
+      summary: Report configured backend capabilities (PROPOSED - backend to confirm)
+      operationId: getCapabilities
+      responses:
+        "200":
+          description: Server feature flags for drafts and SMS resume
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCapabilities"
+
+  /api/v1/onboarding/submissions:
+    post:
+      summary: Submit learner or partner-assisted registration (PROPOSED - backend to confirm)
+      operationId: submitOnboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardingDraft"
+      responses:
+        "201":
+          description: Registration accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionReceipt"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/onboarding/resume-sms:
+    post:
+      summary: Send secure resume link via SMS when configured (PROPOSED - backend to confirm)
+      operationId: requestSmsResume
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, draftToken]
+              properties:
+                phone:
+                  type: string
+                draftToken:
+                  type: string
+      responses:
+        "200":
+          description: SMS queued by backend provider
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sent, message]
+                properties:
+                  sent:
+                    type: boolean
+                  message:
+                    type: string
+
+  /api/v1/jobs:
+    get:
+      summary: List accessible jobs with optional query and accommodation filter (PROPOSED - backend to confirm)
+      operationId: listJobs
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: accommodations
+          in: query
+          required: false
+          description: Comma-separated AccommodationCategory keys (kept private on client; never stored per applicant)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of accessible job postings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JobPosting"
+    post:
+      summary: Publish an employer job with workplace accommodations (PROPOSED - backend to confirm)
+      operationId: createEmployerJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobRequest"
+      responses:
+        "201":
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobPosting"
+
+  /api/v1/jobs/{jobId}/applications:
+    post:
+      summary: Submit a job application (PROPOSED - backend to confirm)
+      operationId: submitJobApplication
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobApplicationDraft"
+      responses:
+        "201":
+          description: Application recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionReceipt"
+
+components:
+  schemas:
+    ApiCapabilities:
+      type: object
+      required: [serverDraftsEnabled, smsResumeEnabled]
+      properties:
+        serverDraftsEnabled:
+          type: boolean
+        smsResumeEnabled:
+          type: boolean
+
+    ConsentRecord:
+      type: object
+      required: [learnerConsented, consentLanguage, partnerOrganizationName, representativeName, sharedFieldsSummary, recordedAtIso]
+      properties:
+        learnerConsented:
+          type: boolean
+        consentLanguage:
+          type: string
+        partnerOrganizationName:
+          type: string
+        representativeName:
+          type: string
+        sharedFieldsSummary:
+          type: array
+          items:
+            type: string
+        recordedAtIso:
+          type: string
+          format: date-time
+
+    OnboardingDraft:
+      type: object
+      required: [registrationMode, fullName, identityRoute]
+      properties:
+        isSharedDevice:
+          type: ["boolean", "null"]
+        registrationMode:
+          type: string
+          enum: [self, partner_assisted]
+        fullName:
+          type: string
+        contactMethod:
+          type: string
+          enum: [phone, email, partner_contact, none]
+        contactValue:
+          type: string
+        identityRoute:
+          type: string
+          enum: [national_id, refugee_id, other_document, no_documents, partner_referral, ""]
+        identityReferenceNumber:
+          type: string
+        partnerReferralOrg:
+          type: string
+        supportPreferences:
+          type: array
+          items:
+            type: string
+        supportNotes:
+          type: string
+        partnerConsent:
+          $ref: "#/components/schemas/ConsentRecord"
+        updatedAtIso:
+          type: string
+          format: date-time
+
+    EmployerAccommodationDetails:
+      type: object
+      required:
+        - workEnvironmentAccessibility
+        - remoteOrFlexibleArrangements
+        - assistiveTechnologyAvailable
+        - communicationOptions
+        - interviewAccommodations
+        - applicationProcessAccommodations
+        - additionalSupportOffered
+      properties:
+        workEnvironmentAccessibility:
+          type: string
+        remoteOrFlexibleArrangements:
+          type: string
+        assistiveTechnologyAvailable:
+          type: string
+        communicationOptions:
+          type: string
+        interviewAccommodations:
+          type: string
+        applicationProcessAccommodations:
+          type: string
+        additionalSupportOffered:
+          type: string
+
+    CreateJobRequest:
+      type: object
+      required: [title, organization, location, isRemote, employmentType, descriptionSummary, requiredSkills, accommodationCategories, accommodationsOffered, accommodationDetails]
+      properties:
+        title:
+          type: string
+        organization:
+          type: string
+        location:
+          type: string
+        isRemote:
+          type: boolean
+        employmentType:
+          type: string
+          enum: [Full-time, Part-time, Apprenticeship, Contract, Fellowship]
+        descriptionSummary:
+          type: string
+        requiredSkills:
+          type: array
+          items:
+            type: string
+        accommodationCategories:
+          type: array
+          items:
+            type: string
+        accommodationsOffered:
+          type: array
+          items:
+            type: string
+        accommodationDetails:
+          $ref: "#/components/schemas/EmployerAccommodationDetails"
+        applicationDeadline:
+          type: string
+
+    JobPosting:
+      allOf:
+        - $ref: "#/components/schemas/CreateJobRequest"
+        - type: object
+          required: [id, postedAtIso, isDemoData]
+          properties:
+            id:
+              type: string
+            postedAtIso:
+              type: string
+              format: date-time
+            isDemoData:
+              type: boolean
+
+    JobApplicationDraft:
+      type: object
+      required: [jobId, applicantName, contactValue, shareAccommodationRequest, explicitConsentToShare]
+      properties:
+        jobId:
+          type: string
+        applicantName:
+          type: string
+        contactValue:
+          type: string
+        relevantExperience:
+          type: string
+        shareAccommodationRequest:
+          type: boolean
+        accommodationRequestNote:
+          type: string
+        explicitConsentToShare:
+          type: boolean
+
+    SubmissionReceipt:
+      type: object
+      required: [id, submittedAtIso, mode, persistedToServer, notice]
+      properties:
+        id:
+          type: string
+        submittedAtIso:
+          type: string
+          format: date-time
+        mode:
+          type: string
+          enum: [mock, real]
+        persistedToServer:
+          type: boolean
+        notice:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string

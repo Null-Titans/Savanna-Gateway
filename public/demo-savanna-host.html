@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulated Savanna Host — Accessible Gateway Web Component</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #eef2f6;
+        color: #0f172a;
+      }
+      .savanna-shell-header {
+        background: #0a2540;
+        color: #ffffff;
+        padding: 14px 24px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .savanna-controls {
+        max-width: 1180px;
+        margin: 16px auto 0;
+        padding: 0 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      .savanna-controls button {
+        min-height: 40px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid #94a3b8;
+        background: #ffffff;
+        color: #0f172a;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .savanna-layout {
+        max-width: 1180px;
+        margin: 16px auto 32px;
+        padding: 0 16px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      @media (min-width: 1024px) {
+        .savanna-layout {
+          grid-template-columns: 2fr 1fr;
+        }
+      }
+      .event-console {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 520px;
+        overflow-y: auto;
+      }
+      .event-entry {
+        border-bottom: 1px solid #334155;
+        padding: 8px 0;
+      }
+    </style>
+    <script src="/accessible-gateway.js" defer></script>
+  </head>
+  <body>
+    <header class="savanna-shell-header">
+      <strong>Simulated Savanna Host LMS</strong>
+      <span>Host controls attributes &amp; listens to Custom Events from &lt;accessible-gateway&gt;</span>
+    </header>
+
+    <div class="savanna-controls">
+      <button type="button" onclick="setGatewayAttr('module', 'onboarding')">Show Onboarding</button>
+      <button type="button" onclick="setGatewayAttr('module', 'career')">Show Career Gateway</button>
+      <button type="button" onclick="setGatewayAttr('theme', 'alx')">ALX Theme</button>
+      <button type="button" onclick="setGatewayAttr('theme', 'neutral')">Neutral Partner Theme</button>
+      <button type="button" onclick="setGatewayAttr('lang', 'en')">English</button>
+      <button type="button" onclick="setGatewayAttr('lang', 'am')">አማርኛ</button>
+      <button type="button" onclick="setGatewayAttr('lang', 'om')">Afaan Oromoo</button>
+    </div>
+
+    <div class="savanna-layout">
+      <div>
+        <accessible-gateway
+          id="savanna-gateway"
+          tenant-key="SAVANNA_ALX_DEMO"
+          theme="alx"
+          module="onboarding"
+          lang="en"
+          api-mode="mock"
+          demo="true"
+        ></accessible-gateway>
+      </div>
+
+      <aside class="event-console" aria-label="Host Custom Event Listener Log">
+        <div style="font-weight: bold; color: #38bdf8; margin-bottom: 8px;">
+          Host CustomEvent Log (Privacy Filtered)
+        </div>
+        <div id="event-log">Waiting for gateway events...</div>
+      </aside>
+    </div>
+
+    <script>
+      const gatewayEl = document.getElementById('savanna-gateway');
+      const logEl = document.getElementById('event-log');
+
+      function setGatewayAttr(name, value) {
+        gatewayEl.setAttribute(name, value);
+      }
+
+      const eventNames = [
+        'gateway:onboarding-started',
+        'gateway:step-changed',
+        'gateway:draft-saved',
+        'gateway:onboarding-submitted',
+        'gateway:support-requested',
+        'gateway:job-applied',
+        'gateway:error',
+      ];
+
+      eventNames.forEach((evtName) => {
+        gatewayEl.addEventListener(evtName, (e) => {
+          if (logEl.textContent === 'Waiting for gateway events...') {
+            logEl.innerHTML = '';
+          }
+          const item = document.createElement('div');
+          item.className = 'event-entry';
+          item.innerHTML =
+            '<div style="color:#34d399;font-weight:bold;">' +
+            evtName +
+            '</div><div>' +
+            JSON.stringify(e.detail) +
+            '</div>';
+          logEl.prepend(item);
+        });
+      });
+    </script>
+  </body>
+</html>

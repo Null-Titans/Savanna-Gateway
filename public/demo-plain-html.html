@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plain HTML Host Demo — Accessible Gateway Web Component</title>
+    <style>
+      /* Deliberately contrasting host page styles to prove Shadow DOM isolation */
+      body {
+        margin: 0;
+        font-family: Georgia, serif;
+        background: #efe9dc;
+        color: #2b2118;
+      }
+      .host-banner {
+        background: #3d2c1d;
+        color: #fff8eb;
+        padding: 16px 24px;
+      }
+      .host-banner h1 {
+        margin: 0 0 4px 0;
+        font-size: 20px;
+      }
+      .host-banner p {
+        margin: 0;
+        font-size: 14px;
+      }
+      .host-main {
+        max-width: 1180px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      /* Aggressive host button style that must NOT leak into Shadow DOM */
+      button {
+        border-radius: 999px;
+        background: crimson;
+        color: yellow;
+      }
+    </style>
+    <script src="/accessible-gateway.js" defer></script>
+  </head>
+  <body>
+    <header class="host-banner">
+      <h1>Third-Party Plain HTML Website (Zero React on Host)</h1>
+      <p>
+        This host page uses Georgia serif and aggressive host CSS rules. The embedded
+        <code>&lt;accessible-gateway&gt;</code> below runs inside Shadow DOM without leaking styles.
+      </p>
+    </header>
+
+    <main class="host-main">
+      <accessible-gateway
+        tenant-key="PLAIN_HTML_PARTNER_01"
+        theme="neutral"
+        org-name="Community Skills Network"
+        module="onboarding"
+        lang="en"
+        api-mode="mock"
+        demo="true"
+      ></accessible-gateway>
+    </main>
+  </body>
+</html>
